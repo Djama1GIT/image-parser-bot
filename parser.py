@@ -1,4 +1,3 @@
-import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 
@@ -14,7 +13,7 @@ from utils.config import settings
 from utils.logger import logger
 from utils.utils import download_image
 
-IMAGES_COUNT = 7
+IMAGES_COUNT = settings.IMAGES_COUNT
 
 HOST = "https://yandex.ru/images/"
 INPUT_TEXT = (By.XPATH, "(//input[@type='text'])[1]")
@@ -36,52 +35,45 @@ if settings.DISABLE_CACHE:
     options.add_argument("--disable-cache")
 
 
-def get(url):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            with webdriver.Chrome(service=service, options=options) as driver:
-                driver.implicitly_wait(5)
-                driver.get(url)
-                return func(driver, *args, **kwargs)
+def yandex_image_search(query: str, count=IMAGES_COUNT) -> list[str]:
+    with webdriver.Chrome(service=service, options=options) as driver:
+        logger.info(f"Search images on query via Yandex: {query}")
 
-        return wrapper
+        driver.implicitly_wait(5)
+        driver.get(HOST)
 
-    return decorator
+        input_elem = driver.find_element(*INPUT_TEXT)
+        input_elem.click()
 
+        for char in query:
+            input_elem.send_keys(char)
+            sleep(0.2)
 
-@get(HOST)
-def yandex_image_search(driver: webdriver.Chrome, query: str, count=IMAGES_COUNT) -> list[str]:
-    logger.info(f"Search images on query via Yandex: {query}")
-    input_elem = driver.find_element(*INPUT_TEXT)
-    input_elem.click()
+        submit_elem = driver.find_element(*SUBMIT)
+        submit_elem.click()
+        sleep(1)
 
-    for char in query:
-        input_elem.send_keys(char)
-        sleep(0.2 + random.random() % 0.2)
+        images: list[str] = []
+        image_elements = driver.find_elements(*IMAGES)
+        for i in range(count):
+            image_elements[i].click()
+            sleep(0.2)
 
-    submit_elem = driver.find_element(*SUBMIT)
-    submit_elem.click()
-    sleep(1)
+            image_element = driver.find_element(*MODAL_IMAGE)
+            images.append(image_element.get_attribute(MODAL_IMAGE_SRC_ATTR))
 
-    image_elements = driver.find_elements(*IMAGES)
-    images = []
-    for i in range(count):
-        image_elements[i].click()
-        sleep(0.2)
-        image_element = driver.find_element(*MODAL_IMAGE)
-        images.append(image_element.get_attribute(MODAL_IMAGE_SRC_ATTR))
-        driver.back()
-        sleep(0.2)
+            driver.back()
+            sleep(0.2)
 
-    return images
+        return images
 
 
 def search_images(query: str) -> list[BytesIO]:
     logger.info(f"Search images on query: {query}")
 
-    image_links = yandex_image_search(query)
+    image_links: list[str] = yandex_image_search(query)
 
-    downloaded_images = []
+    downloaded_images: list[BytesIO] = []
     with ThreadPoolExecutor(max_workers=10) as executor:
         future_to_url = {executor.submit(download_image, url): url for url in image_links}
         for future in as_completed(future_to_url):

@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     WELCOME_MESSAGE: str = os.getenv("WELCOME_MESSAGE")
 
+    IMAGES_COUNT: int = os.getenv("IMAGES_COUNT")
+
     LOAD_STRATEGY: str = os.getenv("LOAD_STRATEGY")
     WINDOW_SIZE: str = os.getenv("WINDOW_SIZE")
     DISABLE_CACHE: bool = os.getenv("DISABLE_CACHE")
