@@ -22,6 +22,7 @@ def notifier_handler(func):
         except Exception as e:
             bot.send_message(message.chat.id, "An error has occurred. Try again later.")
             logger.error(f"Error occurred during message processing: {e}")
+            raise e
         finally:
             if notifier_id:
                 bot.delete_message(message.chat.id, notifier_id)

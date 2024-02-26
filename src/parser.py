@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
+from webdriver_manager.firefox import GeckoDriverManager
 
 from utils.config import settings
 from utils.logger import logger
@@ -22,13 +23,27 @@ IMAGES = (By.XPATH, "(//div[contains(@role, 'listitem')])")
 MODAL_IMAGE = (By.XPATH, "//a[contains(@class, 'MMViewerButtons-OpenImage')]")
 MODAL_IMAGE_SRC_ATTR = "href"
 
-service = Service(executable_path=ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
+if settings.WEBDRIVER == "CHROMIUM":
+    DriverManager = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM)
+    web_driver = webdriver.Chrome
+elif settings.WEBDRIVER == "CHROME":
+    DriverManager = ChromeDriverManager()
+    web_driver = webdriver.Chrome
+else:
+    DriverManager = GeckoDriverManager()
+    web_driver = webdriver.Firefox
+
+service = Service(executable_path=DriverManager.install())
 
 options = webdriver.ChromeOptions()
 options.add_argument(f"--disable-blink-features={settings.DISABLE_BLINK_FEATURES}")
 options.add_argument(f"--user-agent={settings.USER_AGENT}")
 options.add_argument(f"--window-size={settings.WINDOW_SIZE}")
 options.page_load_strategy = settings.LOAD_STRATEGY
+if settings.NO_SANDBOX:
+    options.add_argument(f"--no-sandbox")
+if settings.DISABLE_DEV_SHM_USAGE:
+    options.add_argument(f"--disable-dev-shm-usage")
 if settings.HEADLESS:
     options.add_argument("--headless")
 if settings.DISABLE_CACHE:
@@ -36,7 +51,7 @@ if settings.DISABLE_CACHE:
 
 
 def yandex_image_search(query: str, count=IMAGES_COUNT) -> list[str]:
-    with webdriver.Chrome(service=service, options=options) as driver:
+    with web_driver(service=service, options=options) as driver:
         logger.info(f"Search images on query via Yandex: {query}")
 
         driver.implicitly_wait(5)
