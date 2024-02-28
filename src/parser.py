@@ -132,8 +132,6 @@ class QueryImageSearcher(ImageSearcher):
         driver.get(self.HOST)
 
         input_text = driver.find_element(*self.INPUT_TEXT)
-        input_text.click()
-
         self.slow_type(input_text, request)
 
         submit_elem = driver.find_element(*self.SUBMIT)
@@ -142,7 +140,6 @@ class QueryImageSearcher(ImageSearcher):
 
 
 class ImageFileImageSearcher(ImageSearcher):
-    INPUT_IMAGE = (By.XPATH, "(//button[contains(@class, 'button2')])[1]")
     INPUT_FILE = (By.XPATH, "(//input[contains(@type, 'file')])[1]")
     MORE_BUTTON = (By.XPATH, "(//a[contains(@class, 'CbirSimilar-MoreButton')])")
 
@@ -151,14 +148,10 @@ class ImageFileImageSearcher(ImageSearcher):
         logger.info(f"Searching images on Yandex, photo: {request}")
         driver.get(self.HOST)
 
-        input_image = driver.find_element(*self.INPUT_IMAGE)
-        input_image.click()
-        sleep(0.5)
-
         input_file = driver.find_element(*self.INPUT_FILE)
         input_file.send_keys(request)
         sleep(0.5)
 
         more_button = driver.find_element(*self.MORE_BUTTON)
         more_button.click()
-        sleep(5)
+        sleep(2)

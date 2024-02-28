@@ -1,4 +1,4 @@
-# Green
+# Yandex Image Parser
 
 This project is a Telegram bot parser of Yandex images using Selenium.
 
