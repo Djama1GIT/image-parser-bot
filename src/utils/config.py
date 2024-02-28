@@ -25,6 +25,3 @@ class Settings(BaseSettings):
     HEADLESS: bool = os.getenv("HEADLESS")
     DISABLE_BLINK_FEATURES: str = os.getenv("DISABLE_BLINK_FEATURES")
     USER_AGENT: str = os.getenv("USER_AGENT")
-
-
-settings = Settings()
