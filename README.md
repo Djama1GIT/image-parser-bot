@@ -26,3 +26,6 @@ docker-compose up --build
 - PyTelegramBotAPI - A Python wrapper for the Telegram Bot API.
 - Selenium - A powerful automation library capable of web scraping by automating browsers to interact with dynamic web pages.
 - Docker - A platform used in the project for creating, deploying, and managing containers, allowing the application to run in an isolated environment.
+
+## Usage Example
+![Example](https://i.imgur.com/B7RQQQr.png)
